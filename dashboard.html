@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MedAlert</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/128/3004/3004458.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app-layout">
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-notes-medical"></i>
+                <h2>MedAlert</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="window.location.href='dashboard.html'">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="window.location.href='medicines.html'">
+                    <i class="fa-solid fa-pills"></i> My Medicines
+                </li>
+                <li class="nav-item" onclick="window.location.href='settings.html'">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="theme-toggle" onclick="toggleDarkMode()">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    <span id="themeText">Dark Mode</span>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin: 10px 0;">
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="user-info">
+                        <h4 id="displayUserName">User</h4>
+                        <span class="status-dot"></span> Online
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h2 id="page-title">Overview</h2>
+                <div class="header-actions" style="display:flex; gap:10px;">
+                    <button class="primary-btn add-btn" onclick="openCategoriesModal()" style="background-color: var(--accent);">
+                        <i class="fa-solid fa-layer-group"></i> Medicine Categories
+                    </button>
+                    <button class="primary-btn add-btn" onclick="openAddModal()">
+                        <i class="fa-solid fa-plus"></i> Add Medicine
+                    </button>
+                </div>
+            </header>
+
+            <section class="page-view active">
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel" onclick="window.location.href='medicines.html?filter=all'">
+                        <div class="stat-icon-wrapper blue">
+                            <i class="fa-solid fa-cubes-stacked"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Stored</h3>
+                            <h2 id="totalCount">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel" onclick="window.location.href='medicines.html?filter=safe'">
+                        <div class="stat-icon-wrapper green">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Safe to Use</h3>
+                            <h2 id="safeCount">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel" onclick="window.location.href='medicines.html?filter=near'">
+                        <div class="stat-icon-wrapper orange">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Expiring Soon (≤ 7 days)</h3>
+                            <h2 id="nearCount">0</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel" onclick="window.location.href='medicines.html?filter=expired'">
+                        <div class="stat-icon-wrapper red">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Expired</h3>
+                            <h2 id="expiredCount">0</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="main-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                    <div class="recent-meds glass-panel" style="margin:0;">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Added</h3>
+                        <div id="recentList" class="medicine-list small-list"></div>
+                    </div>
+                    <div class="chart-container glass-panel" style="padding: 1.5rem; display: flex; flex-direction: column; align-items: center;">
+                        <h3 style="align-self: flex-start; margin-bottom: 1rem;"><i class="fa-solid fa-chart-pie"></i> Analytics Overview</h3>
+                        <div style="width: 100%; max-width: 250px; position:relative;">
+                            <canvas id="medChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-prescription-bottle-medical"></i> Add Medicine</h3>
+                <button class="close-btn" onclick="closeAddModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Medicine Name/Brand</label>
+                    <i class="fa-solid fa-pills inside"></i>
+                    <input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" class="with-icon">
+                </div>
+                <div class="input-group">
+                    <label>Category / Type</label>
+                    <i class="fa-solid fa-prescription inside"></i>
+                    <select id="medCategory" class="with-icon custom-select">
+                        <option value="pill">Pill / Tablet</option>
+                        <option value="syrup">Syrup / Liquid</option>
+                        <option value="injection">Injection / Syringe</option>
+                        <option value="drops">Eye / Ear Drops</option>
+                        <option value="inhaler">Inhaler</option>
+                    </select>
+                </div>
+                <!-- <div class="input-group">
+                    <label>Disease Category</label>
+                    <i class="fa-solid fa-virus inside"></i>
+                    <select id="medDiseaseCategory" class="with-icon custom-select">
+                        <option value="General">General</option>
+                        <option value="Fever">Fever</option>
+                        <option value="Cold & Cough">Cold & Cough</option>
+                        <option value="Diabetes">Diabetes</option>
+                        <option value="Blood Pressure">Blood Pressure</option>
+                    </select>
+                </div> -->
+                <div class="input-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="medExpiry">
+                </div>
+                <div class="input-group">
+                    <label>Additional Notes (Optional)</label>
+                    <i class="fa-solid fa-pen inside"></i>
+                    <input type="text" id="medNotes" placeholder="e.g. Take after meals" class="with-icon">
+                </div>
+                <button class="primary-btn mt-2" onclick="saveMedicineAction()">Save Medicine Record</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="categoriesModal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-layer-group"></i> Medicine Categories</h3>
+                <button class="close-btn" onclick="closeCategoriesModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="categoriesModalBody" style="max-height: 60vh; overflow-y: auto;">
+                <!-- Categories or list will be injected here -->
+            </div>
+        </div>
+    </div>
+    <div id="toast-container" class="toast-container"></div>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="notifications.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            initApp();
+            loadDashboardStats();
+        });
+    </script>
+    <script>
+function testEmail() {
+    emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        {
+            name: "Dharani",
+            message: "Paracetamol expired today"
+        },
+        EMAILJS_CONFIG.PUBLIC_KEY
+    ).then(() => {
+        alert("Email Sent Successfully!");
+    });
+}
+</script>
+<script>
+/* =========================
+   🔥 EMAILJS INIT
+========================= */
+emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
+
+
+/* =========================
+   🧠 AUTO CATEGORY LOGIC
+========================= */
+function getCategory(medicineName) {
+    const name = medicineName.toLowerCase();
+
+    if (name.includes("para") || name.includes("dolo") || name.includes("crocin")) {
+        return "Fever";
+    } 
+    else if (name.includes("cough") || name.includes("cold") || name.includes("syrup")) {
+        return "Cold & Cough";
+    } 
+    else if (name.includes("insulin") || name.includes("metformin")) {
+        return "Diabetes";
+    } 
+    else if (name.includes("bp") || name.includes("pressure")) {
+        return "Blood Pressure";
+    } 
+    else {
+        return "General";
+    }
+}
+
+
+/* =========================
+   🔄 LIVE CATEGORY DISPLAY
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+    initApp();
+    loadDashboardStats();
+    checkExpiryAndSendEmail();
+
+    const medInput = document.getElementById("medName");
+    if (medInput) {
+        medInput.addEventListener("input", function () {
+            const category = getCategory(this.value);
+            document.getElementById("autoCategory").innerText = category;
+        });
+    }
+});
+
+
+/* =========================
+   📧 EMAIL FUNCTION
+========================= */
+function sendExpiryEmail(message) {
+    emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        {
+            name: sessionStorage.getItem("activeName") || "User",
+            message: message
+        },
+        EMAILJS_CONFIG.PUBLIC_KEY
+    )
+    .then(() => {
+        console.log("Email Sent Successfully");
+    })
+    .catch((error) => {
+        console.log("Email Error:", error);
+    });
+}
+
+
+/* =========================
+   🔔 CHECK EXPIRY + SEND MAIL
+========================= */
+function checkExpiryAndSendEmail() {
+    const medicines = JSON.parse(localStorage.getItem("medicines")) || [];
+    const today = new Date().toISOString().split("T")[0];
+
+    let expiredList = [];
+
+    medicines.forEach(med => {
+        if (med.expiry < today) {
+            expiredList.push(med.name);
+        }
+    });
+
+    if (expiredList.length > 0) {
+        sendExpiryEmail(expiredList.join(", "));
+    }
+}
+
+
+/* =========================
+   🧪 TEST EMAIL BUTTON
+========================= */
+function testEmail() {
+    sendExpiryEmail("Paracetamol expired today");
+}
+</script>
+
+
+<button onclick="testEmail()">Send Test Email</button>
+</body>
+</html>

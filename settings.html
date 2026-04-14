@@ -1,0 +1,313 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MedAlert</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/128/3004/3004458.png">
+</head>
+<body>
+    <div id="app-layout">
+
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-notes-medical"></i>
+                <h2>MedAlert</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item" onclick="window.location.href='dashboard.html'">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="window.location.href='medicines.html'">
+                    <i class="fa-solid fa-pills"></i> My Medicines
+                </li>
+                <li class="nav-item active" onclick="window.location.href='settings.html'">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="theme-toggle" onclick="toggleDarkMode()">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    <span id="themeText">Dark Mode</span>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin: 10px 0;">
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="user-info">
+                        <h4 id="displayUserName">User</h4>
+                        <span class="status-dot"></span> Online
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        
+        <div class="main-content">
+            <header class="top-header">
+                <h2 id="page-title">Account Settings</h2>
+                <button class="primary-btn add-btn" onclick="openAddModal()">
+                    <i class="fa-solid fa-plus"></i> Add Medicine
+                </button>
+            </header>
+
+            <section class="page-view active">
+                <div class="settings-grid">
+                    <div class="settings-card glass-panel">
+                        <h3><i class="fa-solid fa-id-card"></i> Profile Information</h3>
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="settingName">
+                        </div>
+                        <button class="primary-btn" onclick="updateProfile()">Save Changes</button>
+                    </div>
+
+                    <div class="settings-card glass-panel danger-zone">
+                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h3>
+                        <p>This action cannot be undone. All your medicine data will be permanently wiped from this device.</p>
+                        <button class="danger-btn" onclick="wipeData()"><i class="fa-solid fa-trash"></i> Delete All My Data</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+   
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-prescription-bottle-medical"></i> Add Medicine</h3>
+                <button class="close-btn" onclick="closeAddModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Medicine Name/Brand</label>
+                    <i class="fa-solid fa-pills inside"></i>
+                    <input type="text" id="medName" placeholder="e.g. Paracetamol 500mg" class="with-icon">
+                </div>
+                <div class="input-group">
+                    <label>Category / Type</label>
+                    <i class="fa-solid fa-prescription inside"></i>
+                    <select id="medCategory" class="with-icon custom-select">
+                        <option value="pill">Pill / Tablet</option>
+                        <option value="syrup">Syrup / Liquid</option>
+                        <option value="injection">Injection / Syringe</option>
+                        <option value="drops">Eye / Ear Drops</option>
+                        <option value="inhaler">Inhaler</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="medExpiry">
+                </div>
+                <div class="input-group">
+                    <label>Additional Notes (Optional)</label>
+                    <i class="fa-solid fa-pen inside"></i>
+                    <input type="text" id="medNotes" placeholder="e.g. Take after meals" class="with-icon">
+                </div>
+                <button class="primary-btn mt-2" onclick="saveMedicineAction()">Save Medicine Record</button>
+            </div> 
+    </div>
+    <div id="toast-container" class="toast-container"></div>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <script src="notifications.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            initApp();
+        });
+    </script>
+    <script>const toggle = document.getElementById("emailToggle");
+
+// Load saved setting
+toggle.checked = localStorage.getItem("emailEnabled") === "true";
+
+// Save setting
+toggle.addEventListener("change", () => {
+    localStorage.setItem("emailEnabled", toggle.checked);
+});</script>
+<script>
+if (localStorage.getItem("emailEnabled") !== "false") {
+    sendExpiryEmail(expiredList.join(", "));
+}
+function clearData() {
+    if (confirm("Are you sure? This will delete all data.")) {
+        localStorage.removeItem("medicines");
+        alert("All data cleared!");
+    }
+}
+</script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MedAlert</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+<div id="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass-panel">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-notes-medical"></i>
+            <h2>MedAlert</h2>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item" onclick="window.location.href='dashboard.html'">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </li>
+            <li class="nav-item" onclick="window.location.href='medicines.html'">
+                <i class="fa-solid fa-pills"></i> My Medicines
+            </li>
+            <li class="nav-item active">
+                <i class="fa-solid fa-gear"></i> Settings
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="theme-toggle" onclick="toggleDarkMode()">
+                <i class="fa-solid fa-moon"></i> Dark Mode
+            </div>
+
+            <div class="user-profile">
+                <h4 id="userNameDisplay">User</h4>
+            </div>
+
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <header class="top-header">
+            <h2>Settings</h2>
+        </header>
+
+        <section class="page-view active">
+
+            <!-- Profile -->
+            <div class="settings-card glass-panel">
+                <h3>👤 Profile</h3>
+                <p>Name: <span id="profileName"></span></p>
+            </div>
+
+            <!-- Notifications -->
+            <div class="settings-card glass-panel">
+                <h3>🔔 Notifications</h3>
+                <label>
+                    <input type="checkbox" id="emailToggle">
+                    Enable Email Alerts
+                </label>
+            </div>
+
+            <!-- Export -->
+            <div class="settings-card glass-panel">
+                <h3>📊 Export Data</h3>
+                <button onclick="exportCSV()" class="primary-btn">
+                    Download CSV
+                </button>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-card glass-panel">
+                <h3>⚠️ Danger Zone</h3>
+                <button onclick="clearData()" class="danger-btn">
+                    Delete All Medicines
+                </button>
+            </div>
+
+            <!-- About -->
+            <div class="settings-card glass-panel">
+                <h3>ℹ️ About</h3>
+                <p>This system helps track medicine expiry and send alerts.</p>
+            </div>
+
+        </section>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="notifications.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script>
+
+/* ========================
+   LOAD USER NAME
+======================== */
+document.getElementById("profileName").innerText =
+    sessionStorage.getItem("activeName") || "User";
+
+document.getElementById("userNameDisplay").innerText =
+    sessionStorage.getItem("activeName") || "User";
+
+
+/* ========================
+   EMAIL TOGGLE
+======================== */
+const toggle = document.getElementById("emailToggle");
+
+toggle.checked = localStorage.getItem("emailEnabled") !== "false";
+
+toggle.addEventListener("change", () => {
+    localStorage.setItem("emailEnabled", toggle.checked);
+});
+
+
+/* ========================
+   CLEAR DATA
+======================== */
+function clearData() {
+    if (confirm("Delete all medicines?")) {
+        localStorage.removeItem("medicines");
+        alert("All data cleared!");
+    }
+}
+
+
+/* ========================
+   EXPORT CSV
+======================== */
+function exportCSV() {
+    const meds = JSON.parse(localStorage.getItem("medicines")) || [];
+
+    let csv = "Name,Expiry,Category\n";
+
+    meds.forEach(m => {
+        csv += `${m.name},${m.expiry},${m.category}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+    link.download = "medicines.csv";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>

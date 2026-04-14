@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Expiry Alert System - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/128/3004/3004458.png">
+</head>
+<body>
+    <script>
+        // Force unregister broken service workers immediately on page load
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) { registration.unregister(); }
+            });
+        }
+    </script>
+    <div id="auth-screen" class="full-screen">
+        <div class="glass-card auth-card">
+            <div class="logo-container">
+                <i class="fa-solid fa-notes-medical logo-icon"></i>
+                <h2>MedAlert System</h2>
+                <p class="subtitle">Securely track your medicine expiry</p>
+            </div>
+            
+            <!-- <div id="login-form">
+                <div class="input-group">
+                    <label>Email or Username</label>
+                    <i class="fa-solid fa-envelope inside"></i>
+                    <input type="text" id="loginUsername" placeholder="Email or Username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <i class="fa-solid fa-lock inside"></i>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button class="primary-btn" onclick="login()">Login to Account</button>
+                
+                <p class="toggle-text">New user? <span onclick="toggleAuth()">Create an account</span></p>
+            </div> -->
+            <div id="login-form">
+
+    <!-- Google Login -->
+    <!-- <button class="google-btn" onclick="googleLogin()">
+        <i class="fa-brands fa-google"></i>
+        Continue with Google
+    </button> -->
+
+    <button onclick="googleLogin()" class="google-btn">
+  <i class="fa-brands fa-google"></i> Continue with Google
+</button>
+
+    <div class="divider">OR</div>
+
+    <!-- Normal Login -->
+    <div class="input-group">
+        <label>Email or Username</label>
+        <input type="text" id="loginUsername">
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword">
+    </div>
+
+    <button class="primary-btn" onclick="login()">Login to Account</button>
+
+</div>
+
+            <div id="register-form" style="display: none;">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <i class="fa-solid fa-font inside"></i>
+                    <input type="text" id="regFullName" placeholder="Full Name">
+                </div>
+                <div class="input-group">
+                    <label>Email or Username</label>
+                    <i class="fa-solid fa-envelope inside"></i>
+                    <input type="text" id="regUsername" placeholder="Email or Username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <i class="fa-solid fa-lock inside"></i>
+                    <input type="password" id="regPassword" placeholder="Password">
+                </div>
+                <button class="primary-btn" onclick="register()">Register Now</button>
+                
+                <p class="toggle-text">Already registered? <span onclick="toggleAuth()">Login here</span></p>
+            </div>
+        </div>
+    </div>
+    <!-- <button class="google-btn" onclick="googleLogin()">
+    <i class="fa-brands fa-google"></i> Continue with Google
+</button> -->
+
+    <!-- Notification system -->
+    <div id="toast-container" class="toast-container"></div>
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script> -->
+    <script src="notifications.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+
+<script src="config.js"></script>   <!-- MUST come before auth.js -->
+<script src="auth.js"></script>
+</body>
+</html>

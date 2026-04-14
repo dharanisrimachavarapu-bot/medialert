@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#4CAF50</color>
+    <color name="white">#FFFFFF</color>
+    <color name="safe_green">#4CAF50</color>
+    <color name="near_expiry_orange">#FF9800</color>
+    <color name="expired_red">#F44336</color>
+    <color name="background_light">#F5F5F5</color>
+</resources>
